@@ -9,8 +9,11 @@
 ### Motivation and use case
 
 We had to deal with dockerization and running mostly [WSL][1] and [Docker Desktop CE][2] for development. This works very smooth and we really love it, but it becomes a pain, if you had to deal with different hidden DNS resolvers on your laptop, that are only accessible via VPN or special LAN connections.
+
 Even if your VPN client creates the right [NRTP][3] entries on your host, that are not populated to your WSL console or to your docker daemon. Dynamic DNS resolver adaption is a long running, unsolved issue for WSL and Docker Desktop. Maybe it's addressed in the future by [WSL 2][4] or the [Moby][5] project.
+
 In the meantime we like to use a dockerized DNS proxy running on the host as a workaround. It's configurable during runtime and solves our WSL issues at least. [dnsdist][6] is the Swiss army knife for such use cases.
+
 But of course we like to provide this image for any other [dnsdist][0] related use case.
 
 [0]: https://dnsdist.org
@@ -51,6 +54,7 @@ Added downstream server 8.8.8.8:53
 Listening on 0.0.0.0:53
 ...
 ```
+</details>
 
 <details>
 <summary>always restart <code>d2nsdist</code> with explicit console key</summary>
@@ -78,6 +82,7 @@ sudo apt-get install -y dnsdist
 controlSocket("127.0.0.1")
 setKey("CaQ/vT2fLIf2TMqRwbMwbeGGs++5nc61V+BAWAZ4MJ8=")
 ```
+</details>
 
 <details>
 <summary>point your <code>/etc/resolv.conf</code> to <code>d2nsdist</code></summary>
