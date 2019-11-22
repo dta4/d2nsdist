@@ -30,21 +30,21 @@ It's available via [Dockerhub][7].
 
 Build and run as usual:
 ```bash
-# docker build --tag=d2nsdist .
+# docker build --tag=dnsdist .
 docker run -p 53:53/udp -p 53:53/tcp -p 5199:5199 -p 8053:8053 \
-           -d --restart=unless-stopped --name d2nsdist d2nsdist
-docker container stop d2nsdist
+           -d --restart=unless-stopped --name dnsdist dnsdist
+docker container stop dnsdist
 ```
 
-[7]: https://hub.docker.com/r/dta4/d2nsdist
+[7]: https://hub.docker.com/r/dta4/dnsdist
 
 ### Usage
 
 <details>
-<summary>pick console key from <code>d2nsdist</code> docker log</summary>
+<summary>pick console key from <code>dnsdist</code> docker log</summary>
 
 ```bash
-[~] >>docker logs d2nsdist
+[~] >>docker logs dnsdist
 Running: /usr/bin/dnsdist --disable-syslog --supervised
 
 Set console key: setKey("CaQ/vT2fLIf2TMqRwbMwbeGGs++5nc61V+BAWAZ4MJ8=")
@@ -57,13 +57,13 @@ Listening on 0.0.0.0:53
 </details>
 
 <details>
-<summary>always restart <code>d2nsdist</code> with explicit console key</summary>
+<summary>always restart <code>dnsdist</code> with explicit console key</summary>
 
 ```bash
-docker container stop d2nsdist
+docker container stop dnsdist
 docker run -p 53:53/udp -p 53:53/tcp -p 5199:5199 -p 8053:8053 \
            -e CONSOLE_KEY='CaQ/vT2fLIf2TMqRwbMwbeGGs++5nc61V+BAWAZ4MJ8=' \
-           -d --restart=always --name d2nsdist d2nsdist
+           -d --restart=always --name dnsdist dnsdist
 ```
 </details>
 
@@ -85,7 +85,7 @@ setKey("CaQ/vT2fLIf2TMqRwbMwbeGGs++5nc61V+BAWAZ4MJ8=")
 </details>
 
 <details>
-<summary>point your <code>/etc/resolv.conf</code> to <code>d2nsdist</code></summary>
+<summary>point your <code>/etc/resolv.conf</code> to <code>dnsdist</code></summary>
 
 ```
 # removed symlink to /run/resolvconf/resolv.conf
@@ -105,8 +105,8 @@ dnsdist -c
 dnsdist -c -e 'showServers()'
 
 # dnsdist console via container client
-docker exec -it d2nsdist dnsdist -c
-docker exec -it d2nsdist dnsdist -c -e 'showRules()'
+docker exec -it dnsdist dnsdist -c
+docker exec -it dnsdist dnsdist -c -e 'showRules()'
 
 # dnsdist API
 curl -sS -H 'X-API-Key: token' http://127.0.0.1:8053/api/v1/servers/localhost | jq '.rules[]'
@@ -144,7 +144,7 @@ We are using:
 ### Todo
 
 - [ ] provide a valid console key without `makeKey()`
-- [ ] how to feed changing downstream servers to d2nsdist?
+- [ ] how to feed changing downstream servers to dnsdist?
 ```powershell
 PowerShell.exe -Command 'Get-DnsClientServerAddress -AddressFamily IPv4'`
 ```

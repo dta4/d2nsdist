@@ -17,5 +17,6 @@ jobs:
     - name: Build and publish
       uses: dta4/hub/dockerize@master
       with:
+        image: dnsdist
         github_token: ${{ secrets.GITHUB_TOKEN }}
         docker_token: ${{ secrets.DOCKER_TOKEN }}
