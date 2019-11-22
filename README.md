@@ -132,7 +132,8 @@ dig +short @127.0.0.1 dnsdist.org
 ```bash
 nc -z -v 127.0.0.1 8053
 if [ "$?" == "0" ]; then
-  DNS_RULES=`curl -m5 -sS -H 'X-API-Key: token' http://127.0.0.1:8053/api/v1/servers/localhost | jq '.rules[]'`
+  DNS_RULES=`curl -m5 -sS -H 'X-API-Key: token' \
+    http://127.0.0.1:8053/api/v1/servers/localhost | jq '.rules[]'`
   if [ -z "$DNS_RULES" ]; then
   cat <<EOT | dnsdist -c >/dev/null 2>&1
 newServer({address="192.168.168.2", name="eth", pool="downstream"})
