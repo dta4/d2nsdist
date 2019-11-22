@@ -1,4 +1,4 @@
-FROM alpine:latest
+FROM alpine:3.10
 
 MAINTAINER Andreas Schulze <asl@iaean.net>
 
@@ -8,7 +8,7 @@ RUN apk --no-cache add tini coreutils \
     apk --no-cache --repository=http://dl-cdn.alpinelinux.org/alpine/edge/main add \
         protobuf fstrm && \
     apk --no-cache --repository=http://dl-cdn.alpinelinux.org/alpine/edge/community add \
- 	dnsdist dnsdist-doc && \
+ 	dnsdist 're2<2019.11.01-r0' && \
     rm -rf /var/cache/apk/*
 
 ENV MO_VERSION="2.1.0"
