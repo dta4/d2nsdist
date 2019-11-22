@@ -8,13 +8,13 @@
 
 ### Motivation and use case
 
-We had to deal with dockerization and running mostly [WSL][1] and [Docker Desktop CE][2] for development. This works very smooth and we really love it, but it becomes a pain, if you had to deal with different hidden DNS resolvers on your laptop, that are only accessible via VPN or special LAN connections.
+We had to deal with dockerization and running mostly [WSL][1] and [Docker Desktop CE][2] for development. This works very smoothly and we really love it, but it becomes a pain, if you had to deal with different hidden DNS resolvers on your laptop, that are only accessible via VPN or special LAN connections.
 
 Even if your VPN client creates the right [NRTP][3] entries on your host, that are not populated to your WSL console or to your docker daemon. Dynamic DNS resolver adaption is a long running, unsolved issue for WSL and Docker Desktop. Maybe it's addressed in the future by [WSL 2][4] or the [Moby][5] project.
 
 In the meantime we like to use a dockerized DNS proxy running on the host as a workaround. It's configurable during runtime and solves our WSL issues at least. [dnsdist][6] is the Swiss army knife for such use cases.
 
-But of course we like to provide this image for any other [dnsdist][0] related use case.
+But of course we like to provide this image for any other `dnsdist` related use case.
 
 [0]: https://dnsdist.org
 [1]: https://docs.microsoft.com/windows/wsl/
@@ -112,7 +112,61 @@ docker exec -it dnsdist dnsdist -c -e 'showRules()'
 curl -sS -H 'X-API-Key: token' http://127.0.0.1:8053/api/v1/servers/localhost | jq '.rules[]'
 ```
 
-**Enjoy!** Point your browser at [http://127.0.0.1:8083](http://127.0.0.1:8083) and log in with any username, and the default `password`.
+But there is no rule set applied by default...
+```bash
+dig +short @127.0.0.1 dnsdist.org
+```
+
+So you need to setup your rules first. The simplest rule is applied via
+```bash
+echo 'addAction(AllRule(), PoolAction("default"))' | dnsdist -c
+
+# Yeehawk...
+dig +short @127.0.0.1 dnsdist.org
+188.166.104.92
+```
+
+<details>
+<summary>more sophisticated bootstrapping example from <code>.bashrc</code></summary>
+
+```bash
+nc -z -v 127.0.0.1 8053
+if [ "$?" == "0" ]; then
+  DNS_RULES=`curl -m5 -sS -H 'X-API-Key: token' \
+    http://127.0.0.1:8053/api/v1/servers/localhost | jq '.rules[]'`
+  if [ -z "$DNS_RULES" ]; then
+    cat <<EOT | dnsdist -c >/dev/null 2>&1
+newServer({address="192.168.168.2", name="eth", pool="downstream"})
+newServer({address="192.168.189.1", name="wlan", pool="downstream"})
+
+newServer({address="10.100.1.10", name="ns.example.com", pool="example"})
+newServer({address="10.100.2.10", name="ns2.example.com", pool="example"})
+
+addAction("example.com.", PoolAction("example"))
+addAction("example.org.", PoolAction("example"))
+
+addAction(AllRule(), PoolAction("downstream"))
+EOT
+  fi
+  echo DNS Servers:
+  echo 'showServers()' | dnsdist -c | head -n -1 | tail -n +2 | \
+     awk '{ printf "%4s | %10s | %s (%s)\n", $4, $14, $2, $3 }'
+  echo
+fi
+```
+```
+Connection to 127.0.0.1 8053 port [tcp/*] succeeded!
+DNS Servers:
+  up |    default | dns.google (8.8.4.4:53)
+  up |    default | dns.google (8.8.8.8:53)
+  up | downstream | eth (192.168.168.2:53)
+down | downstream | wlan (192.168.189.1:53)
+  up |    example | ns.example.com (10.100.1.10:53)
+down |    example | ns2.example.com (10.100.2.10:53)
+```
+</details>
+
+**Enjoy!** Point your browser at [http://127.0.0.1:8053](http://127.0.0.1:8053) and log in with any username, and the default `password`.
 
 ### Configuration
 
